@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+ <name>xiaomimiio</name>
+ <title>Xiaomi miIO v2</title>
+ <title_ru>Xiaomi miIO v2</title_ru>
+ <category>devices</category>
+ <author>mambursoft</author>
+ <url>https://github.com/mambursoft/majordomo-xiaomimiio-v2</url>
+ <version>2.0.0</version>
+ <description>Xiaomi miIO integration for MajorDoMo with pure PHP cloud connector, device services and full en/ru/uk localization.</description>
+ <description_ru>Xiaomi miIO integration for MajorDoMo with pure PHP cloud connector, device services and full en/ru/uk localization.</description_ru>
+ <support>https://github.com/mambursoft/majordomo-xiaomimiio-v2/issues</support>
+ <requires></requires>
+</module>
