@@ -1,0 +1,28 @@
+name: Build module package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build archives
+        run: |
+          mkdir -p dist
+          NAME=${GITHUB_REPOSITORY##*/}
+          REF=${GITHUB_REF_NAME}
+          tar --exclude=.git --exclude=dist --exclude=.github -czf "dist/${NAME}-${REF}.tar.gz" .
+          zip -rq "dist/${NAME}-${REF}.zip" . -x '.git/*' 'dist/*' '.github/*'
+          ls -lh dist
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/*
