@@ -371,27 +371,25 @@ class miIO {
 
 	public function getMsgID($ip) {
 
-		if (file_exists ('id.json')) {
-			$file = file_get_contents('id.json');
-			$ids = json_decode($file, TRUE);
-		} else {
-			file_put_contents('id.json', '');
-			$ids = array();
+		$file = dirname(__FILE__) . '/id.json';
+		$handle = @fopen($file, 'c+');
+		if ($handle === false) {
+			return mt_rand(1, 1000);
 		}
-
-		if (!empty($ids)) {
-			if (array_key_exists($ip, $ids)) {
-				if ($ids[$ip] > 1000) $ids[$ip] = 1;
-				 else $ids[$ip] += 1;
-			} else {
-				$ids += [$ip => 1];
-			}
-		} else {
-			$ids = [$ip => 1];
-		}
-
-		file_put_contents('id.json', json_encode($ids));
-
+		flock($handle, LOCK_EX);
+		rewind($handle);
+		$content = stream_get_contents($handle);
+		$ids = $content === '' ? array() : json_decode($content, true);
+		if (!is_array($ids)) $ids = array();
+		if (isset($ids[$ip]) && (int)$ids[$ip] > 1000) $ids[$ip] = 1;
+		elseif (isset($ids[$ip])) $ids[$ip] = (int)$ids[$ip] + 1;
+		else $ids[$ip] = 1;
+		rewind($handle);
+		ftruncate($handle, 0);
+		fwrite($handle, json_encode($ids));
+		fflush($handle);
+		flock($handle, LOCK_UN);
+		fclose($handle);
 		return $ids[$ip];
 	}
 
