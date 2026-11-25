@@ -997,6 +997,14 @@ array('did'=>'water_box_carriage_status','siid'=>4,'piid'=>6),
     {
 
         if ($this->ajax) {
+            global $session;
+            include_once(DIR_MODULES . "control_access/control_access.class.php");
+            $access = new control_access();
+            if (!$access->checkAccess($this->name)) {
+                http_response_code(403);
+                echo json_encode(array("status" => "error", "msg" => "Access denied"));
+                exit;
+            }
             global $op;
             if ($op == 'process') {
                 global $device_id;
