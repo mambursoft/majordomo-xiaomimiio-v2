@@ -1,4 +1,43 @@
+<a class="btn btn-default btn-sm" href="?view_mode=vacuum"><i class="glyphicon glyphicon-hourglass"></i> Roborock vacuum</a>
 <a class="btn btn-default btn-sm" href="../templates/xiaomimiio/manual.html" target="_blank" rel="noopener"><i class="glyphicon glyphicon-book"></i> <#LANG_XIAOMIMIIO_MANUAL#></a>
+[#if VIEW_MODE="vacuum"#]
+<link rel="stylesheet" href="../templates/xiaomimiio/css/vacuum.css" type="text/css">
+<div class="mjd-vacuum">
+ <div class="mjd-vacuum-head"><h2>Roborock vacuum</h2><a class="btn btn-default btn-sm" href="?">Back</a></div>
+ <div class="mjd-vacuum-toolbar">
+  <select id="vacuum_device" class="form-control">[#begin VACUUM_DEVICES#]<option value="[#ID#]">[#TITLE#] ([#DEVICE_TYPE#])</option>[#end VACUUM_DEVICES#]</select>
+  <button class="btn btn-primary btn-sm" onclick="mjVacuumMap()">Load map</button>
+  <button class="btn btn-default btn-sm" onclick="mjVacuumRooms()">Load rooms</button>
+ </div>
+ <div class="mjd-vacuum-grid">
+  <div class="mjd-vacuum-map"><img id="vacuum_map" alt="Map" style="max-width:100%;height:auto;"><div id="vacuum_zones"></div></div>
+  <div class="mjd-vacuum-side">
+   <h4>Rooms</h4><div id="vacuum_rooms"></div>
+   <h4>Commands</h4><div class="btn-group">
+    <button class="btn btn-success btn-sm" onclick="mjVacuumCmd('app_start',[])">Start</button>
+    <button class="btn btn-default btn-sm" onclick="mjVacuumCmd('app_pause',[])">Pause</button>
+    <button class="btn btn-warning btn-sm" onclick="mjVacuumCmd('app_stop',[])">Stop</button>
+    <button class="btn btn-default btn-sm" onclick="mjVacuumCmd('app_charge',[])">Charge</button>
+    <button class="btn btn-default btn-sm" onclick="mjVacuumCmd('app_spot',[])">Spot</button>
+   </div>
+   <h4>Zones</h4><div class="form-group"><label>x1 y1 x2 y2 count</label><input id="vacuum_zone" class="form-control" value="26234,26042,27284,26642,1"></div>
+   <button class="btn btn-primary btn-sm" onclick="mjVacuumZone()">Clean zone</button>
+   <h4>Goto</h4><div class="form-group"><label>x,y</label><input id="vacuum_goto" class="form-control" value="26000,26000"></div>
+   <button class="btn btn-default btn-sm" onclick="mjVacuumGoto()">Go to</button>
+  </div>
+ </div>
+ <div id="vacuum_msg"></div>
+</div>
+<script>
+function mjVacuumId(){return document.getElementById('vacuum_device').value;}
+function mjVacuumMsg(t){document.getElementById('vacuum_msg').textContent=t;}
+function mjVacuumMap(){var id=mjVacuumId();if(!id){mjVacuumMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_vacuum.php?op=map&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){mjVacuumMsg(d.msg||'Map error');return;}document.getElementById('vacuum_map').src=d.url+'&t='+Date.now();mjVacuumMsg(d.map.version+' '+d.map.width+'x'+d.map.height+' robot '+JSON.stringify(d.map.robot));});}
+function mjVacuumRooms(){var id=mjVacuumId();if(!id){mjVacuumMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_vacuum.php?op=rooms&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){mjVacuumMsg(d.msg||'Rooms error');return;}var h='';for(var i=0;i<d.rooms.length;i++){var r=d.rooms[i];h+='<button class="btn btn-default btn-sm" style="margin:2px;" onclick="mjVacuumCmd(\\'app_segment_clean\\',['+r.segment+'])">Room '+r.room_id+' / segment '+r.segment+'</button>';}document.getElementById('vacuum_rooms').innerHTML=h||'No rooms';});}
+function mjVacuumCmd(method,params){var f=new FormData();f.append('method',method);f.append('params',JSON.stringify(params));fetch('/modules/xiaomimiio/ajax_vacuum.php?op=clean&id='+mjVacuumId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){mjVacuumMsg(method+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));setTimeout(mjVacuumMap,3000);});}
+function mjVacuumZone(){var v=document.getElementById('vacuum_zone').value.split(',').map(Number);mjVacuumCmd('app_zoned_clean',[[v[0],v[1],v[2],v[3],v[4]||1]]);}
+function mjVacuumGoto(){var v=document.getElementById('vacuum_goto').value.split(',').map(Number);mjVacuumCmd('app_goto_target',v);}
+</script>
+[#endif VIEW_MODE#]
 <!-- action usual -->
 [#if DATA_SOURCE="miio_devices" || DATA_SOURCE=""#]
 <!-- table miio_devices search -->
