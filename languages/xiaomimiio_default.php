@@ -82,7 +82,13 @@ $dictionary = array(
 'XIMI_APP_DEACTIVATE_LAN_MODE' => 'Deactivate developer mode',
 'XIMI_APP_KEY' => 'Key',
 'XIMI_APP_ON' => 'Enable',
-'XIMI_APP_OFF' => 'Disable'
+'XIMI_APP_OFF' => 'Disable',
+'XIAOMIMIIO_MANUAL' => 'Manual',
+'XIAOMIMIIO_MANUAL_TEXT' => 'Instruction is available below.',
+'XIAOMIMIIO_MANUAL_STEP1' => 'Open settings and check the connection.',
+'XIAOMIMIIO_MANUAL_STEP2' => 'Open settings and check the connection.',
+'XIAOMIMIIO_MANUAL_STEP3' => 'Open settings and check the connection.',
+'XIAOMIMIIO_MANUAL_FULL' => 'Full manual'
 );
 
 foreach ($dictionary as $k=>$v)
@@ -93,11 +99,4 @@ foreach ($dictionary as $k=>$v)
    }
 }
 
-?>
 
-if (!defined('LANG_XIAOMIMIIO_MANUAL')) define('LANG_XIAOMIMIIO_MANUAL', 'Manual');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_TEXT')) define('LANG_XIAOMIMIIO_MANUAL_TEXT', 'Instruction is available below.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP1')) define('LANG_XIAOMIMIIO_MANUAL_STEP1', 'Open settings and check the connection.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP2')) define('LANG_XIAOMIMIIO_MANUAL_STEP2', 'Откройте настройки и проверьте подключение.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP3')) define('LANG_XIAOMIMIIO_MANUAL_STEP3', 'Відкрийте налаштування та перевірте підключення.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_FULL')) define('LANG_XIAOMIMIIO_MANUAL_FULL', 'Full manual');

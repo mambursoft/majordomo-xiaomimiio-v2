@@ -83,7 +83,13 @@ $dictionary = array(
 'XIMI_APP_DEACTIVATE_LAN_MODE' => 'Деактивувати режим розробника',
 'XIMI_APP_KEY' => 'Ключ',
 'XIMI_APP_ON' => 'Включити',
-'XIMI_APP_OFF' => 'Вимкнути'
+'XIMI_APP_OFF' => 'Вимкнути',
+'XIAOMIMIIO_MANUAL' => 'Мануал',
+'XIAOMIMIIO_MANUAL_TEXT' => 'Інструкція нижче.',
+'XIAOMIMIIO_MANUAL_STEP1' => 'Спочатку використовуйте пошук лише для читання.',
+'XIAOMIMIIO_MANUAL_STEP2' => 'Спочатку використовуйте пошук лише для читання.',
+'XIAOMIMIIO_MANUAL_STEP3' => 'Спочатку використовуйте пошук лише для читання.',
+'XIAOMIMIIO_MANUAL_FULL' => 'Повний мануал'
 );
 
 foreach ($dictionary as $k=>$v)
@@ -94,11 +100,3 @@ foreach ($dictionary as $k=>$v)
    }
 }
 
-?>
-
-if (!defined('LANG_XIAOMIMIIO_MANUAL')) define('LANG_XIAOMIMIIO_MANUAL', 'Мануал');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_TEXT')) define('LANG_XIAOMIMIIO_MANUAL_TEXT', 'Instruction is available below.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP1')) define('LANG_XIAOMIMIIO_MANUAL_STEP1', 'Save changes after validation only.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP2')) define('LANG_XIAOMIMIIO_MANUAL_STEP2', 'Сохраняйте изменения только после проверки.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_STEP3')) define('LANG_XIAOMIMIIO_MANUAL_STEP3', 'Зберігайте зміни тільки після перевірки.');
-if (!defined('LANG_XIAOMIMIIO_MANUAL_FULL')) define('LANG_XIAOMIMIIO_MANUAL_FULL', 'Повний мануал');
