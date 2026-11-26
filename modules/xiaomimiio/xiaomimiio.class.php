@@ -339,6 +339,11 @@ class xiaomimiio extends module
             $this->redirect("?");
         }
 
+        if ($this->view_mode == 'vacuum') {
+            $out['VACUUM_DEVICES'] = SQLSelect("SELECT ID, TITLE, DEVICE_TYPE FROM miio_devices WHERE DEVICE_TYPE LIKE '%vacuum%' ORDER BY TITLE");
+            return;
+        }
+
         if (isset($this->data_source) && !isset($_GET['data_source']) && !isset($_POST['data_source'])) {
             $out['SET_DATASOURCE'] = 1;
         }
