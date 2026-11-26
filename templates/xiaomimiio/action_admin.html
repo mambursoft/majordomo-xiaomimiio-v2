@@ -12,9 +12,14 @@
  <div class="mjd-vacuum-grid">
   <div class="mjd-vacuum-map"><h4>Status</h4><pre id="af_status"></pre><h4>Recipes</h4><div id="af_recipes"></div></div>
   <div class="mjd-vacuum-side">
-   <h4>Recipe editor (JSON)</h4><textarea id="af_recipe" class="form-control" rows="8" style="font-family:monospace;">[]</textarea>
-   <button class="btn btn-primary btn-sm" onclick="afApply()">Save recipe</button>
-   <button class="btn btn-success btn-sm" onclick="afAction('start_recipe_cook')">Start recipe</button>
+   <h4>Новий рецепт</h4>
+   <div class="form-group"><label>Назва</label><input id="af_rname" class="form-control" value="Картопля фрі"></div>
+   <div class="form-group"><label>Час (хв)</label><input id="af_rtime" class="form-control" value="15"></div>
+   <div class="form-group"><label>Температура (°C)</label><input id="af_rtemp" class="form-control" value="180"></div>
+   <div class="form-group"><label>Кількість їжі (0-5)</label><input id="af_rfood" class="form-control" value="1"></div>
+   <button class="btn btn-primary btn-sm" onclick="afApplyFriendly()">Зберегти рецепт</button>
+   <button class="btn btn-success btn-sm" onclick="afAction('start_recipe_cook')">Запустити рецепт</button>
+   <details style="margin-top:10px;"><summary>Додатково: JSON</summary><textarea id="af_recipe" class="form-control" rows="6" style="font-family:monospace;">[]</textarea><button class="btn btn-default btn-sm" onclick="afApply()">Зберегти JSON</button></details>
    <h4>Custom mode</h4>
    <div class="form-group"><label>Target time (min)</label><input id="af_time" class="form-control" value="15"></div>
    <div class="form-group"><label>Target temperature</label><input id="af_temp" class="form-control" value="180"></div>
@@ -33,10 +38,13 @@
  <div id="af_msg"></div>
 </div>
 <script>
-function afId(){return document.getElementById('af_device').value;}
+function afId(){var s=document.getElementById('af_device');if(!s||!s.options.length){document.getElementById('af_msg').textContent='Немає пристроїв. Додайте аерогриль у розділі Devices.';return '';}return s.value;}
 function afMsg(t){document.getElementById('af_msg').textContent=t;}
 function afVal(id){return document.getElementById(id).value;}
-function afLoad(op){var id=afId();if(!id){afMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_airfryer.php?op='+op+'&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){afMsg(d.msg||'Error');return;}if(op==='status'){document.getElementById('af_status').textContent=JSON.stringify(d.values,null,2);}else{document.getElementById('af_recipes').textContent=JSON.stringify(d.recipes,null,2);document.getElementById('af_recipe').value=d.raw||'[]';}afMsg(op+' loaded');});}
+function afLoad(op){var id=afId();if(!id){afMsg('Виберіть пристрій');return;}fetch('/modules/xiaomimiio/ajax_airfryer.php?op='+op+'&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){afMsg(d.msg||'Помилка');return;}if(op==='status'){document.getElementById('af_status').textContent=JSON.stringify(d.values,null,2);}else{var h='';for(var i=0;i<d.recipes.length;i++){var r=d.recipes[i];h+='<button class="btn btn-default btn-sm" style="margin:2px;" onclick="afPickRecipe('+JSON.stringify(r).replace(/"/g,'&quot;')+')">'+(r.name||r.id)+'</button>';}document.getElementById('af_recipes').innerHTML=h||'Рецептів поки немає — створіть новий праворуч';document.getElementById('af_recipe').value=d.raw||'[]';}afMsg(op+' завантажено');});}
+function afPickRecipe(r){document.getElementById('af_rname').value=r.name||'';document.getElementById('af_rtime').value=r.data&&r.data.time?r.data.time:(r.data&&r.data.target_time?r.data.target_time:15);document.getElementById('af_rtemp').value=r.data&&r.data.temp?r.data.temp:(r.data&&r.data.target_temperature?r.data.target_temperature:180);document.getElementById('af_rfood').value=r.data&&r.data.food?r.data.food:1;afMsg('Рецепт вибрано: '+(r.name||r.id));}
+function afApplyFriendly(){var r=[{id:'custom',name:document.getElementById('af_rname').value,time:Number(document.getElementById('af_rtime').value),temp:Number(document.getElementById('af_rtemp').value),food:Number(document.getElementById('af_rfood').value)}];var f=new FormData();f.append('recipe_sync',JSON.stringify(r));fetch('/modules/xiaomimiio/ajax_airfryer.php?op=apply&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(x){return x.json();}).then(function(d){afMsg(d.status+': '+(d.msg||''));
+});}
 function afSet(did,value){var f=new FormData();f.append('did',did);f.append('value',value);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=set&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(did+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));});}
 function afAction(name){var f=new FormData();f.append('name',name);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=action&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(name+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));setTimeout(function(){afLoad('status');},2000);});}
 function afApply(){var f=new FormData();f.append('recipe_sync',document.getElementById('af_recipe').value);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=apply&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(d.status+': '+(d.msg||''));});}
@@ -53,7 +61,7 @@ function afApply(){var f=new FormData();f.append('recipe_sync',document.getEleme
   <button class="btn btn-default btn-sm" onclick="mjVacuumRooms()">Load rooms</button>
  </div>
  <div class="mjd-vacuum-grid">
-  <div class="mjd-vacuum-map"><img id="vacuum_map" alt="Map" style="max-width:100%;height:auto;"><div id="vacuum_zones"></div></div>
+  <div class="mjd-vacuum-map"><img id="vacuum_map" alt="Map" style="max-width:100%;height:auto;display:none;" onerror="this.style.display='none';document.getElementById('vacuum_msg').textContent='Карта ще не завантажена. Натисніть Load map.';"><div id="vacuum_zones"></div></div>
   <div class="mjd-vacuum-side">
    <h4>Rooms</h4><div id="vacuum_rooms"></div>
    <h4>Commands</h4><div class="btn-group">
@@ -72,9 +80,9 @@ function afApply(){var f=new FormData();f.append('recipe_sync',document.getEleme
  <div id="vacuum_msg"></div>
 </div>
 <script>
-function mjVacuumId(){return document.getElementById('vacuum_device').value;}
+function mjVacuumId(){var s=document.getElementById('vacuum_device');if(!s||!s.options.length){document.getElementById('vacuum_msg').textContent='Немає пилососів. Додайте Roborock у розділі Devices.';return '';}return s.value;}
 function mjVacuumMsg(t){document.getElementById('vacuum_msg').textContent=t;}
-function mjVacuumMap(){var id=mjVacuumId();if(!id){mjVacuumMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_vacuum.php?op=map&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){mjVacuumMsg(d.msg||'Map error');return;}document.getElementById('vacuum_map').src=d.url+'&t='+Date.now();mjVacuumMsg(d.map.version+' '+d.map.width+'x'+d.map.height+' robot '+JSON.stringify(d.map.robot));});}
+function mjVacuumMap(){var id=mjVacuumId();if(!id){mjVacuumMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_vacuum.php?op=map&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){mjVacuumMsg(d.msg||'Map error');return;}var img=document.getElementById('vacuum_map');img.style.display='block';img.src=d.url+'&t='+Date.now();mjVacuumMsg(d.map.version+' '+d.map.width+'x'+d.map.height+' robot '+JSON.stringify(d.map.robot));});}
 function mjVacuumRooms(){var id=mjVacuumId();if(!id){mjVacuumMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_vacuum.php?op=rooms&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){mjVacuumMsg(d.msg||'Rooms error');return;}var h='';for(var i=0;i<d.rooms.length;i++){var r=d.rooms[i];h+='<button class="btn btn-default btn-sm" style="margin:2px;" onclick="mjVacuumCmd(\\'app_segment_clean\\',['+r.segment+'])">Room '+r.room_id+' / segment '+r.segment+'</button>';}document.getElementById('vacuum_rooms').innerHTML=h||'No rooms';});}
 function mjVacuumCmd(method,params){var f=new FormData();f.append('method',method);f.append('params',JSON.stringify(params));fetch('/modules/xiaomimiio/ajax_vacuum.php?op=clean&id='+mjVacuumId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){mjVacuumMsg(method+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));setTimeout(mjVacuumMap,3000);});}
 function mjVacuumZone(){var v=document.getElementById('vacuum_zone').value.split(',').map(Number);mjVacuumCmd('app_zoned_clean',[[v[0],v[1],v[2],v[3],v[4]||1]]);}
