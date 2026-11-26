@@ -339,6 +339,11 @@ class xiaomimiio extends module
             $this->redirect("?");
         }
 
+        if ($this->view_mode == 'airfryer') {
+            $out['AIRFRYER_DEVICES'] = SQLSelect("SELECT ID, TITLE, DEVICE_TYPE FROM miio_devices WHERE DEVICE_TYPE LIKE '%fryer%' ORDER BY TITLE");
+            return;
+        }
+
         if ($this->view_mode == 'vacuum') {
             $out['VACUUM_DEVICES'] = SQLSelect("SELECT ID, TITLE, DEVICE_TYPE FROM miio_devices WHERE DEVICE_TYPE LIKE '%vacuum%' ORDER BY TITLE");
             return;

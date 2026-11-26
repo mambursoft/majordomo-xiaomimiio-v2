@@ -1,4 +1,47 @@
+<a class="btn btn-default btn-sm" href="?view_mode=airfryer"><i class="glyphicon glyphicon-flash"></i> Air fryer</a>
 <a class="btn btn-default btn-sm" href="?view_mode=vacuum"><i class="glyphicon glyphicon-hourglass"></i> Roborock vacuum</a>
+[#if VIEW_MODE="airfryer"#]
+<link rel="stylesheet" href="../templates/xiaomimiio/css/vacuum.css" type="text/css">
+<div class="mjd-vacuum">
+ <div class="mjd-vacuum-head"><h2>Xiaomi Air Fryer</h2><a class="btn btn-default btn-sm" href="?">Back</a></div>
+ <div class="mjd-vacuum-toolbar">
+  <select id="af_device" class="form-control">[#begin AIRFRYER_DEVICES#]<option value="[#ID#]">[#TITLE#] ([#DEVICE_TYPE#])</option>[#end AIRFRYER_DEVICES#]</select>
+  <button class="btn btn-primary btn-sm" onclick="afLoad('status')">Status</button>
+  <button class="btn btn-default btn-sm" onclick="afLoad('recipes')">Recipes</button>
+ </div>
+ <div class="mjd-vacuum-grid">
+  <div class="mjd-vacuum-map"><h4>Status</h4><pre id="af_status"></pre><h4>Recipes</h4><div id="af_recipes"></div></div>
+  <div class="mjd-vacuum-side">
+   <h4>Recipe editor (JSON)</h4><textarea id="af_recipe" class="form-control" rows="8" style="font-family:monospace;">[]</textarea>
+   <button class="btn btn-primary btn-sm" onclick="afApply()">Save recipe</button>
+   <button class="btn btn-success btn-sm" onclick="afAction('start_recipe_cook')">Start recipe</button>
+   <h4>Custom mode</h4>
+   <div class="form-group"><label>Target time (min)</label><input id="af_time" class="form-control" value="15"></div>
+   <div class="form-group"><label>Target temperature</label><input id="af_temp" class="form-control" value="180"></div>
+   <div class="form-group"><label>Food quantity 0-5</label><input id="af_food" class="form-control" value="1"></div>
+   <button class="btn btn-default btn-sm" onclick="afSet('target_time',afVal('af_time'))">Set time</button>
+   <button class="btn btn-default btn-sm" onclick="afSet('target_temperature',afVal('af_temp'))">Set temp</button>
+   <button class="btn btn-default btn-sm" onclick="afSet('food_quanty',afVal('af_food'))">Set food</button>
+   <h4>Control</h4><div class="btn-group">
+    <button class="btn btn-success btn-sm" onclick="afAction('start_cook')">Start</button>
+    <button class="btn btn-default btn-sm" onclick="afAction('pause')">Pause</button>
+    <button class="btn btn-default btn-sm" onclick="afAction('resume_cooking')">Resume</button>
+    <button class="btn btn-warning btn-sm" onclick="afAction('cancel_cooking')">Stop</button>
+   </div>
+  </div>
+ </div>
+ <div id="af_msg"></div>
+</div>
+<script>
+function afId(){return document.getElementById('af_device').value;}
+function afMsg(t){document.getElementById('af_msg').textContent=t;}
+function afVal(id){return document.getElementById(id).value;}
+function afLoad(op){var id=afId();if(!id){afMsg('Select device');return;}fetch('/modules/xiaomimiio/ajax_airfryer.php?op='+op+'&id='+id,{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.status!=='ok'){afMsg(d.msg||'Error');return;}if(op==='status'){document.getElementById('af_status').textContent=JSON.stringify(d.values,null,2);}else{document.getElementById('af_recipes').textContent=JSON.stringify(d.recipes,null,2);document.getElementById('af_recipe').value=d.raw||'[]';}afMsg(op+' loaded');});}
+function afSet(did,value){var f=new FormData();f.append('did',did);f.append('value',value);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=set&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(did+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));});}
+function afAction(name){var f=new FormData();f.append('name',name);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=action&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(name+': '+d.status+' '+JSON.stringify(d.result||d.msg||''));setTimeout(function(){afLoad('status');},2000);});}
+function afApply(){var f=new FormData();f.append('recipe_sync',document.getElementById('af_recipe').value);fetch('/modules/xiaomimiio/ajax_airfryer.php?op=apply&id='+afId(),{method:'POST',body:f,credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){afMsg(d.status+': '+(d.msg||''));});}
+</script>
+[#endif VIEW_MODE#]
 <a class="btn btn-default btn-sm" href="../templates/xiaomimiio/manual.html" target="_blank" rel="noopener"><i class="glyphicon glyphicon-book"></i> <#LANG_XIAOMIMIIO_MANUAL#></a>
 [#if VIEW_MODE="vacuum"#]
 <link rel="stylesheet" href="../templates/xiaomimiio/css/vacuum.css" type="text/css">
